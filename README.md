@@ -14,4 +14,4 @@ Recruitment Company Scrapper and Project Contract
 
 
 ##Screenshot
-![Alt text](/Images/Output.PNG "Output Screenshot")
+![Alt text](/Images/Output Screenshot.PNG "Output Screenshot")
