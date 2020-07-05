@@ -14,19 +14,15 @@ import openpyxl #Lib for excel files
 import re
 import time
 # import nltk
-# from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup
 
 # from google.colab import drive
 # drive.mount('/gdrive')
 # %cd /gdrive
 
-import nltk
-nltk.download('punkt')
-nltk.download('averaged_perceptron_tagger')
-
 host = 'outlook.office365.com'
-username = "<YOUR_EMAIL_ID>"
-password = "<EMAIL_PASSWORD>"
+username = "primetech.pm@outlook.com"
+password = "primetech123"
 
 mail = imaplib.IMAP4_SSL(host)
 login=False
@@ -45,8 +41,6 @@ del wb
 email_list=[]
 contact_list=[]
 name_list=[]
-
-common_words=["My","I","I'm","Name","Contact","Email","Address","Sent","To","From","Date","Signature","Hello","Hey","Hi","Good","Morning","Evening","Afternoon"]
 
 my_path = "Details.xlsx" #Enter your excel file name
 my_wb_obj = openpyxl.load_workbook(my_path)
@@ -67,198 +61,6 @@ except Exception as e:
 
 nlp = spacy.load("en_core_web_sm")
 
-
-def get_email(msg):
-
-    try:
-      email = re.findall("\w+@\w+\.{1}\w+", msg)
-      print("email found",set(email))
-      return set(email)
-    except:
-      print("email not found")
-      email = ""
-      return email
-
-def get_phone(msg):
-    contact = set()
-    try:
-        phone = re.finditer(r'(?:(?:\+|0{0,2})91(\s*[\ -]\s*)?|[0]?)?[789]\d{9}|(\d[ -]?){10}\d$',msg, re.MULTILINE)
-        for matchNum, match in enumerate(phone, start=1):
-            print (2,match.group())
-            contact.add(match.group())
-        return contact
-    except:
-        pass
-
-    try:
-        phone = re.findall(r'\(?\b[2-9][0-9]{2}\)?[-][2-9][0-9]{2}[-][0-9]{4}\b', msg)
-        print(3, phone)
-        if all(phone):
-          return phone
-    except:
-        pass
-
-    try:
-        phone = re.findall('(?:(?:\+?([1-9]|[0-9][0-9]|[0-9][0-9][0-9])\s*(?:[.-]\s*)?)?(?:\(\s*([2-9]1[02-9]|[2-9][02-8]1|[2-9][02-8][02-9])\s*\)|([0-9][1-9]|[0-9]1[02-9]|[2-9][02-8]1|[2-9][02-8][02-9]))\s*(?:[.-]\s*)?)?([2-9]1[02-9]|[2-9][02-9]1|[2-9][02-9]{2})\s*(?:[.-]\s*)?([0-9]{4})(?:\s*(?:#|x\.?|ext\.?|extension)\s*(\d+))?', msg)
-        print(3.1, phone)
-        if all(phone):
-          return phone
-    except:
-        pass
-
-    try:
-        phone = re.findall('(\d{3}[-\.\s]\d{3}[-\.\s]\d{4}|\(\d{3}\)\s*\d{3}[-\.\s]\d{4}|\d{3}[-\.\s]\d{4})', msg)
-        print(3.2, phone)
-        if all(phone):
-          return phone
-    except:
-        pass
-
-    try:
-        phone = re.findall('(?:(?:\+?1\s*(?:[.-]\s*)?)?(?:\(\s*([2-9]1[02-9]|[2-9][02-8]1|[2-9][02-8][02-9])\s*\)|([2-9]1[02-9]|[2-9][02-8]1|[2-9][02-8][02-9]))\s*(?:[.-]\s*)?)?([2-9]1[02-9]|[2-9][02-9]1|[2-9][02-9]{2})\s*(?:[.-]\s*)?([0-9]{4})(?:\s*(?:#|x\.?|ext\.?|extension)\s*(\d+))?', msg)
-        print(3.3, phone)
-        if all(phone):
-          return phone
-    except:
-        pass
-
-    try:
-        phone = re.findall('^((((\(?0\d{4}\)?\s?\d{3}\s?\d{3})|(\(?0\d{3}\)?\s?\d{3}\s?\d{4})|(\(?0\d{2}\)?\s?\d{4}\s?\d{4}))(\s?\(\d{4}|\d{3}))?)|((\+44\s?7\d{3}|\(?07\d{3}\)?)\s?\d{3}\s?\d{3})|((((\+44\s?\d{4}|\(?0\d{4}\)?)\s?\d{3}\s?\d{3})|((\+44\s?\d{3}|\(?0\d{3}\)?)\s?\d{3}\s?\d{4})|((\+44\s?\d{2}|\(?0\d{2}\)?)\s?\d{4}\s?\d{4}))(\s?\(\d{4}|\d{3}))?$', msg)
-        print(4, phone)
-        if all(phone):        
-          return phone
-    except:
-        pass
-
-    try:
-        phone = re.findall('(^1300\d{6}$)|(^1800|1900|1902\d{6}$)|(^0[2|3|7|8]{1}[0-9]{8}$)|(^13\d{4}$)|(^04\d{2,3}\d{6}$)', msg)
-        print(5, phone)
-        if all(phone):
-          return phone
-    except:
-        pass
-
-    try:
-        phone = re.findall('^[2-9]\d{2}-\d{3}-\d{4}$', msg)
-        print(6, phone)
-        if all(phone):        
-          return phone
-    except:
-        pass
-
-    try:
-        phone = re.findall('^(?:(?:\+|0{0,2})91(\s*[\-]\s*)?|[0]?)?[789]\d{9}$', msg)
-        print(7, phone)
-        if all(phone):        
-          return phone
-    except:
-        pass
-
-    try:
-        phone = re.findall('^(?:(?:\(?(?:0(?:0|11)\)?[\s-]?\(?|\+)44\)?[\s-]?(?:\(?0\)?[\s-]?)?)|(?:\(?0))(?:(?:\d{5}\)?[\s-]?\d{4,5})|(?:\d{4}\)?[\s-]?(?:\d{5}|\d{3}[\s-]?\d{3}))|(?:\d{3}\)?[\s-]?\d{3}[\s-]?\d{3,4})|(?:\d{2}\)?[\s-]?\d{4}[\s-]?\d{4}))(?:[\s-]?(?:x|ext\.?|\#)\d{3,4})?$', msg)
-        print(8, phone)
-        if all(phone):
-          return phone
-    except:
-        pass
-
-    try:
-        phone = re.findall('^(((\+44\s?\d{4}|\(?0\d{4}\)?)\s?\d{3}\s?\d{3})|((\+44\s?\d{3}|\(?0\d{3}\)?)\s?\d{3}\s?\d{4})|((\+44\s?\d{2}|\(?0\d{2}\)?)\s?\d{4}\s?\d{4}))(\s?\#(\d{4}|\d{3}))?$', msg)
-        print(9, phone)
-        if all(phone):
-          return phone
-    except:
-        pass
-
-    try:
-        phone = re.findall('^\+[0-9]{1,3}\.[0-9]{4,14}(?:x.+)?$', msg)
-        print(10, phone)
-        if all(phone):
-          return phone
-    except:
-        pass
-
-    try:
-        phone = re.findall('^\+(?:[0-9]●?){6,14}[0-9]$', msg)
-        print(11, phone)
-        if all(phone):
-          return phone
-    except:
-        pass
-
-    try:
-        phone = re.findall('\(?\+[0-9]{1,3}\)? ?-?[0-9]{1,3} ?-?[0-9]{3,5} ?-?[0-9]{4}( ?-?[0-9]{3})?', msg)
-        print(12, phone)
-        if all(phone):
-          return phone
-    except:
-        pass
-
-    try:
-        phone = re.findall('/\(?([0-9]{3})\)?([ .-]?)([0-9]{3})\2([0-9]{4})/', msg)
-        print(13, phone)
-        if all(phone):
-          return phone
-    except:
-        pass
-
-    try:
-        phone = re.findall('^(1[ \-\+]{0,3}|\+1[ -\+]{0,3}|\+1|\+)?((\(\+?1-[2-9][0-9]{1,2}\))|(\(\+?[2-8][0-9][0-9]\))|(\(\+?[1-9][0-9]\))|(\(\+?[17]\))|(\([2-9][2-9]\))|([ \-\.]{0,3}[0-9]{2,4}))?([ \-\.][0-9])?([ \-\.]{0,3}[0-9]{2,4}){2,3}$', msg)
-        print(14, phone)
-        if all(phone):
-          return phone
-    except:
-        pass
-
-    try:
-        phone = re.findall('^((\(?0\d{4}\)?\s?\d{3}\s?\d{3})|(\(?0\d{3}\)?\s?\d{3}\s?\d{4})|(\(?0\d{2}\)?\s?\d{4}\s?\d{4}))(\s?\#(\d{4}|\d{3}))?$', msg)
-        print(15, phone)
-        if all(phone):
-          return phone
-    except:
-        pass
-
-    try:
-        phone = re.findall('^(\+44\s?7\d{3}|\(?07\d{3}\)?)\s?\d{3}\s?\d{3}$', msg)
-        print(16, phone)
-        if all(phone):
-          return phone
-    except:
-        pass
-
-    try:
-        phone = re.findall('/^[+]?(?:\(\d+(?:\.\d+)?\)|\d+(?:\.\d+)?)(?:[ -]?(?:\(\d+(?:\.\d+)?\)|\d+(?:\.\d+)?))*(?:[ ]?(?:x|ext)\.?[ ]?\d{1,5})?$/', msg)
-        print(17, phone)
-        if all(phone):
-          return phone
-    except:
-        pass
-
-    try:
-        phone = re.findall('(\+1|1)?[ \-\.]?\(?(?<areacode>[0-9]{3})\)?[ \-\.]?(?<prefix>[0-9]{3})[ \-\.]?(?<number>[0-9]{4})[ \.]*(ext|x)?[ \.]*(?<extension>[0-9]{0,5})', msg)
-        print(18, phone)
-        if all(phone):
-          return phone
-    except:
-        pass
-
-    try:
-       phone = re.findall(r'\(?\b[2-9][0-9]{2}\)?[-. ]?[2-9][0-9]{2}[-. ]?[0-9]{4}\b', msg)
-       print(19, phone)
-       if all(phone):
-         return phone
-    except:
-        print ('Phone number not found')
-        phone = ''
-        return phone
-
-
-def get_name(msg):
-    msg = nltk.word_tokenize(msg)
-    msg = nltk.pos_tag(msg)
-    return msg
-
-
 def get_inbox():
     mail.select('INBOX')
     _, data = mail.uid('search',None,"ALL")
@@ -275,9 +77,11 @@ def get_inbox():
         for part in email_message.walk():    
             content_type = part.get_content_type()
             if "plain" in content_type:
-                body = part.get_payload(decode=True)
+              body = part.get_payload(decode=True)
+              try:
                 messages.append(body.decode("utf-8").replace("\r\n"," "))
-                # pass
+              except:
+                pass
 
             # elif "text/html" in content_type:
             #     html_body = part.get_payload()
@@ -291,6 +95,20 @@ def logout():
     mail.close()
     mail.logout()
     print("Logged Out")
+
+
+filter = ['0','1','2','3','4','5','6','7','8','9','@','#',"_","/"]
+common_words =["My","I","I'm","Name","Contact","Email","Address","Sent","To","From","Date","Signature","Hello","Hey","Hi","Good","Morning","Evening","Afternoon","Founder","Developer","Co-Developer","Co Developer","Director","Project","Manager","Sales","Advisor","Technology","Consultant","Group","Corporation","Thanks","Regards","Dear","Sir"]
+
+
+def filter_name(inp,filter):
+  
+  flag=0
+  for i in range(len(inp)):
+    for j in range(len(filter)):
+      if filter[j] in inp[i]:
+        return False
+  return True
 
 
 def named(msg):
@@ -317,21 +135,41 @@ def named(msg):
 
 
   for token in doc:
-    if (token.pos_ == "PROPN" and token.tag_=="NNP" and not token.like_num and not token.like_email or token.tag_=="NNPS"):
+    if (token.pos_ == "PROPN" and token.text not in common_words and token.tag_=="NNP" and not token.like_num and not token.like_email or token.tag_=="NNPS"):
       name_flag=1
       name_string+=" "+token.text
     elif (name_flag==1):
-      names[name_string[1:]]={'email':None, 'phone':None}
-      name.append(name_string[1:])
-      name_string=""
-      name_flag=0
+      if (filter_name(name_string[1:],filter)):
+        names[name_string[1:]]={'email':None, 'phone':None}
+        name.append(name_string[1:])
+        name_string=""
+        name_flag=0
+      else:
+        name_string=""
+        name_flag=0
+        
     
     if (token.like_num and len(token.text)>=7):
-      #print(token.text,name[-phones[token.text]])
-      names[name[-phones[token.text]]]['phone'] = token.text
+      ph_flag=0
+      for key, val in names.items():
+          if name[-phones[token.text]] in key:
+            ph_flag=1
+            names[key]['phone'] = token.text
+            break
+      if(ph_flag==0):
+        names[name[-phones[token.text]]]['phone'] = token.text
       
     if (token.like_email):
-      names[name[-mails[token.text]]]['email'] = token.text
+      em_flag=0
+      for key, val in names.items():
+          if name[-mails[token.text]] in key:
+            em_flag=1
+            names[key]['email'] = token.text
+            break
+      if(em_flag==0):
+        names[name[-mails[token.text]]]['email'] = token.text
+  
+
   print("------------------- Final Contact Details -------------------")
   print(names)
   i=my_sheet_obj.max_row+1
@@ -358,92 +196,9 @@ if __name__ == "__main__":
         print("--------------------------------------------\n",count,message)
         count+=1
         named(message)
+        if(count>20):
+          break
       t4 = time.time()
       print("Time for categorization and saving all fields in the Excel Sheet: ",(t4-t3),"seconds")
       print("Total time required: ",(t4-t1)," seconds")
       print("Completed")
-
-import spacy
-
-nlp = spacy.load("en_core_web_sm")
-doc = nlp("I would like to connect you with my boss, Mr Ravi Shankar and my senior Mr Ayush. You can connect to them via ceo@gmail.com or ravi@gmail.com.     Yours truly, Priyam Shah 7738478888 ")
-first = ["I", "we", "our", "my"]
-second = ["you","your"]
-third = ["he", "his", "him", "her", "she", "their", "they", "them"]
-name = {}
-names=[]
-
-print(type(doc))
-for token in doc:
-  if (token.)
-
-# for token in doc:
-#   if (token.pos_ == "PROPN" and token.tag_ == "NNP" and token.text not in name and ):
-#     name[token.text]={'rank':[], 'email':[], 'phone':[]}
-
-print(name)
-
-import spacy
-
-nlp = spacy.load("en_core_web_sm")
-doc = nlp("I would like to connect you with my boss, Mr Ravi Shankar and my senior Mr Ayush. You can connect to them via ceo@gmail.com or ravi@gmail.com. Yours truly, Priyam Shah 7738478888")
-names={}
-name=[]
-phone=[]
-mail=[]
-name_flag=0
-name_string=""
-phones={}
-mails={}
-for token in doc:
-  print(token.text," --> ", token.pos_," --> ",token.tag_)
-  if (token.like_num and len(token.text)>=7):
-    phones[token.text] = 1
-  if (token.like_email):
-    mails[token.text] = 1
-
-for i in range (len(doc)-1,-1,-1):
-  if (doc[i].like_num and doc[i].head.like_num and len(doc[i])>=7) and len(doc[i].head)>=7:
-    phones[doc[i].head.text]+=phones[doc[i].text]
-  if (doc[i].like_email and doc[i].head.like_email):
-    mails[doc[i].head.text]+=mails[doc[i].text]
-
-
-print(doc)
-for token in doc:
-  if (token.pos_ == "PROPN" and token.tag_=="NNP" and not token.like_num and not token.like_email or token.tag_=="NNPS"):
-    name_flag=1
-    name_string+=" "+token.text
-  elif (name_flag==1):
-    names[name_string[1:]]={'rank':[], 'email':[], 'phone':[]}
-    name.append(name_string[1:])
-    name_string=""
-    name_flag=0
-	
-  if (token.like_num and len(token.text)>=7):
-    #print(token.text,name[-phones[token.text]])
-    names[name[-phones[token.text]]]['phone'] = token.text
-    
-  if (token.like_email):
-    names[name[-mails[token.text]]]['email'] = token.text
-    
-print("-------------------------- Name and Contact No. --------------------------")
-print(name)
-print(phones)
-print("------------------- Final Contact Details -------------------")
-print(names)
-
-nltk.download('maxent_ne_chunker')
-nltk.download('words')
-
-from nltk import tokenize
-para = "In our CRM system we would like to incoporate all the users emails and contacts such as 1) A B Devilliars, abc@gmail.com, 7869504532 2) DEF GHI, def@hotmail.com, 9870675643 3) hij klm, hij@outlook.mail, 022 28324000     Yours truly, Amrutesh Jain, Director, amrutesh@gmail.com "
-sents = tokenize.sent_tokenize(para)
-print(sents)
-sent = tokenize.word_tokenize(sents[0])
-from nltk import tag
-tagged_sent = tag.pos_tag(sent)
-tagged_sent
-from nltk import chunk
-tree = chunk.ne_chunk(tagged_sent)
-print(tree)
