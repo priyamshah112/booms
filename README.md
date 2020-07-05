@@ -3,7 +3,7 @@
 Recruitment Company Scrapper and Project Contract
 
 
-##Complexity:
+Complexity:
 
 1. Time: For every message the time complexity is O(n^2)
     n for token search and another for filtering the name contents.
@@ -13,5 +13,5 @@ Recruitment Company Scrapper and Project Contract
 - Total time required:  6.087226629257202  seconds
 
 
-##Screenshot
+Screenshot
 ![Alt text](/Images/Output Screenshot.PNG "Output Screenshot")
